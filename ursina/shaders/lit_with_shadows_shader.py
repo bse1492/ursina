@@ -133,7 +133,7 @@ void main() {
 
     float distance_to_camera = length(vertex_world_position.xyz - camera_world_position);
     float fog_length = fog_end - fog_start;
-    float t = distance_to_camera/fog_length;
+    float t = (distance_to_camera - fog_start) / fog_length;
     t = clamp(t, 0., 1.);
     fragment_color.rgb = mix(fragment_color.rgb, fog_color.rgb, t * fog_color.a);
 }
