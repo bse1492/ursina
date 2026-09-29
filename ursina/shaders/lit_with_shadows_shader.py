@@ -92,7 +92,10 @@ vec4 cast_shadows(vec4 color) {
     float shadow_samples_float = float(shadow_samples);
     float half_shadow_blur = shadow_blur / 2.0;
 
-    for (int i = 0; i < p3d_LightSource.length(); ++i) {
+    // One light only (the arrays have size 1). GLSL before 4.0 requires constant sampler-array
+    // indexes, and strict drivers (e.g. AMD's legacy GL 3.3) refuse to link a loop index here.
+    {
+        const int i = 0;
         vec3 diff = p3d_LightSource[i].position.xyz - vertex_position * p3d_LightSource[i].position.w;
         vec3 L = normalize(diff);
 
