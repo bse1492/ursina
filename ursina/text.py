@@ -284,9 +284,10 @@ class Text(Entity):
         font = FontPool.load_font(font_file_path.name)
 
         if font:
+            # FontPool shares one font between all Text entities, so don't clear() it here: that orphans the
+            # glyph pages every existing Text still uses, and each new Text leaked a page texture.
+            # resolution_setter clears only when the resolution actually changes.
             self._font = font
-            self._font.clear()  # remove assertion warning
-            self._font.setPixelsPerUnit(self.resolution)
             self._font.setLineHeight(self.line_height)
             if self.text:
                 self.text = self.raw_text   # update text
@@ -362,7 +363,9 @@ class Text(Entity):
     def resolution_setter(self, value):
         if self.font is None:
             return
-        self._font.setPixelsPerUnit(value)
+        if self._font.getPixelsPerUnit() != value:
+            self._font.clear()  # DynamicTextFont asserts if its resolution changes while it has glyph pages
+            self._font.setPixelsPerUnit(value)
 
 
     def wordwrap_setter(self, value):   # set this to make the text wrap after a certain number of characters.
