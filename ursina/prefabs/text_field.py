@@ -39,6 +39,7 @@ class TextField(Entity):
         self.text = ''
         self.delimiters = ' .,!?;:(){}[]<>\'\"@#$%^&*+=-\\|/`~'
         self.replacements = dict()
+        self.highlighter = None     # optional callable(visible_text) -> the text with color tags; used instead of replacements
         self.on_undo = []
         self.on_redo = []
         self.on_value_changed = None
@@ -771,7 +772,10 @@ class TextField(Entity):
         if not hasattr(self.text_entity, 'raw_text') or self._prev_text != text or self.scroll != self._prev_scroll:
             # print(self.scroll)
 
-            if self.replacements:
+            if self.highlighter:
+                self.text_entity.text = self.highlighter(text)
+
+            elif self.replacements:
                 _lines = text.split('\n')
                 for i in range(len(_lines)):
                     if _lines[i].lstrip().startswith('#'):
