@@ -828,7 +828,6 @@ class Entity(NodePath, metaclass=PostInitCaller):
             if self.is_empty():
                 return
             self.setShader(value._shader)
-            value.entity = self
 
             for key, shader_input in value.default_input.items():
                 if callable(shader_input):
