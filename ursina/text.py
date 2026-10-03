@@ -22,6 +22,8 @@ from ursina.models.procedural.quad import Quad
 # only good for titles for now.
 
 from functools import lru_cache
+_loaded_fonts = {}  # font file path -> the font FontPool loaded for it (see Text.font_setter)
+
 @lru_cache()
 def _search_for_file(name, folders, file_types=None): # prioritizes based on file_type order, then folder order.
     if file_types is None and '.' not in name:
@@ -276,12 +278,18 @@ class Text(Entity):
         if not font_file_path:
             print_warning('missing font:', value)
             return
-        # font = FontPool.load_font(str(font_file_path))
-        # since FontPool can't import fonts from path on Windows, add the directory to the "model path" and load by name
-        from panda3d.core import getModelPath
-        _model_path = getModelPath()
-        _model_path.append_path(str(font_file_path.parent.resolve()))
-        font = FontPool.load_font(font_file_path.name)
+        # FontPool hands back the same font for the same file, but asking it means resolving the folder and
+        # searching the model path again: about 2 ms for every Text created. Remember the answer per file.
+        font = _loaded_fonts.get(font_file_path)
+        if font is None:
+            # font = FontPool.load_font(str(font_file_path))
+            # since FontPool can't import fonts from path on Windows, add the directory to the "model path" and load by name
+            from panda3d.core import getModelPath
+            _model_path = getModelPath()
+            _model_path.append_path(str(font_file_path.parent.resolve()))
+            font = FontPool.load_font(font_file_path.name)
+            if font:
+                _loaded_fonts[font_file_path] = font
 
         if font:
             # FontPool shares one font between all Text entities, so don't clear() it here: that orphans the
