@@ -284,6 +284,8 @@ class Ursina(ShowBase):
 
 
         for e in scene.entities:
+            if e in scene._entities_marked_for_removal:
+                continue
             if e.enabled is False or e.ignore or e.ignore_input:
                 continue
             if application.paused and e.ignore_paused is False:
@@ -333,6 +335,8 @@ class Ursina(ShowBase):
                 __main__.text_input(key)
 
         for e in scene.entities:
+            if e in scene._entities_marked_for_removal:
+                continue
             if e.enabled is False or e.ignore or e.ignore_input:
                 continue
             if application.paused and e.ignore_paused is False:
