@@ -71,10 +71,10 @@ class Shader:
     def __init__(self, name='untitled_shader', language=GLSL, vertex=default_vertex_shader, fragment=default_fragment_shader, geometry='', **kwargs):
 
         if not ('__compiled__' in globals() and str(globals()['__compiled__'].__class__.__name__) == '__nuitka_version__'):
-            from inspect import getframeinfo, stack
-            _stack = stack()
-            _caller = getframeinfo(_stack[1][0])
-            self.path = Path(_caller.filename)
+            # `inspect.stack()` reads the source lines of every frame (about 0.1 s per shader, twenty shaders
+            # at import); the caller's file is all that is used.
+            import sys
+            self.path = Path(sys._getframe(1).f_code.co_filename)
 
         self.name = name
         self.language = language
